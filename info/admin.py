@@ -109,14 +109,19 @@ class AttendanceClassAdmin(admin.ModelAdmin):
         start_date = datetime.strptime(request.POST['startdate'], '%Y-%m-%d').date()
         end_date = datetime.strptime(request.POST['enddate'], '%Y-%m-%d').date()
 
-        try:
-            a = AttendanceRange.objects.all()[:1].get()
-            a.start_date = start_date
-            a.end_date = end_date
-            a.save()
-        except AttendanceRange.DoesNotExist:
-            a = AttendanceRange(start_date=start_date, end_date=end_date)
-            a.save()
+        # try:
+        #     a = AttendanceRange.objects.all()[:1].get()
+        #     a.start_date = start_date
+        #     a.end_date = end_date
+        #     a.save()
+        # except AttendanceRange.DoesNotExist:
+        #     a = AttendanceRange(start_date=start_date, end_date=end_date)
+        #     a.save()
+
+        a, created = AttendanceRange.objects.get_or_create()
+        a.start_date = start_date
+        a.end_date = end_date
+        a.save()
 
         Attendance.objects.all().delete()
         AttendanceClass.objects.all().delete()

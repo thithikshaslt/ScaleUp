@@ -281,17 +281,36 @@ days = {
 }
 
 
+# def create_attendance(sender, instance, **kwargs):
+#     if kwargs['created']:
+#         start_date = AttendanceRange.objects.all()[:1].get().start_date
+#         end_date = AttendanceRange.objects.all()[:1].get().end_date
+#         for single_date in daterange(start_date, end_date):
+#             if single_date.isoweekday() == days[instance.day]:
+#                 try:
+#                     AttendanceClass.objects.get(date=single_date.strftime("%Y-%m-%d"), assign=instance.assign)
+#                 except AttendanceClass.DoesNotExist:
+#                     a = AttendanceClass(date=single_date.strftime("%Y-%m-%d"), assign=instance.assign)
+#                     a.save()
+
+
 def create_attendance(sender, instance, **kwargs):
     if kwargs['created']:
-        start_date = AttendanceRange.objects.all()[:1].get().start_date
-        end_date = AttendanceRange.objects.all()[:1].get().end_date
+        attendance_range = AttendanceRange.objects.first()  # Get the first AttendanceRange or None
+
+        if attendance_range is None:
+            return  # Exit the function if no attendance range exists
+
+        start_date = attendance_range.start_date
+        end_date = attendance_range.end_date
+
         for single_date in daterange(start_date, end_date):
             if single_date.isoweekday() == days[instance.day]:
-                try:
-                    AttendanceClass.objects.get(date=single_date.strftime("%Y-%m-%d"), assign=instance.assign)
-                except AttendanceClass.DoesNotExist:
-                    a = AttendanceClass(date=single_date.strftime("%Y-%m-%d"), assign=instance.assign)
-                    a.save()
+                AttendanceClass.objects.get_or_create(
+                    date=single_date.strftime("%Y-%m-%d"), 
+                    assign=instance.assign
+                )
+
 
 
 def create_marks(sender, instance, **kwargs):
